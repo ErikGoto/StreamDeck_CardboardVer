@@ -1,3 +1,10 @@
+#include "Adafruit_NeoPixel.h"
+
+//Pinos led
+#define pinLED 10 //Pino SIG da cascata de led
+#define ledCount 24
+Adafruit_NeoPixel strip(ledCount, pinLED, NEO_GRB + NEO_KHZ800);
+
 #define pinA 2
 #define pinB 3
 #define pinC 4
@@ -33,6 +40,9 @@ void setup() {
   }
 
 
+  strip.setBrightness(20);
+  strip.begin();
+  strip.show();
 }
 
 boolean ledLastState = false;
@@ -136,6 +146,9 @@ void loop() {
     muteAux = 0;
     }
 
+  strip.setPixelColor(0, 0, 100, 0);
+  strip.setPixelColor(23, 0, 0, 100);
+  strip.show();
 
 
 }
