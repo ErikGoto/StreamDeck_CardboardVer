@@ -94,6 +94,8 @@ int muteAux = 0;
 
 //Controle do anel de led
 int indexAudioLed = 0;
+unsigned long tempLed = 1000;
+unsigned long tempLedAnt = 1000;
 
 void loop() {
   //Acelerador
@@ -101,6 +103,27 @@ void loop() {
   sendDataUSB(XState, XLastState, 'x', 'z');
   XLastState = XState;
 
+  //Controle dos Leds
+  tempLed = millis();
+  if (digitalRead(pinX) == false && tempLed - tempLedAnt > 10) {
+    tempLedAnt = tempLed;
+    
+    strip.setPixelColor(indexAudioLed, 50-indexAudioLed, indexAudioLed*3, indexAudioLed+10);
+    if (indexAudioLed < 23) {
+      indexAudioLed++;
+    }
+  }
+  if (digitalRead(pinX) == true && tempLed - tempLedAnt > 500) {
+    tempLedAnt = tempLed;
+    
+    strip.setPixelColor(indexAudioLed, 0, 0, 0);
+    if (indexAudioLed > 0) {
+      indexAudioLed--;
+    }
+  }
+  strip.show();
+
+  //-------------------------------------------------------------------------------------------------------------------------------
   int AState = digitalRead(pinA);
   sendDataUSB(AState, ALastState, 'A', 'B');
   ALastState = AState;
@@ -134,31 +157,11 @@ void loop() {
   if (inZ > (ZLastState + 5)) {
     ZLastState = inZ;
     Serial.write('O');
-
-    //Controle do led
-    for (int i = 0; i <= indexAudioLed; i++) {
-      strip.setPixelColor(i, 0, 100, 100);
-      strip.setPixelColor(i+1, 0, 100, 100);
-    }
-    if (indexAudioLed < 22) {
-      indexAudioLed = indexAudioLed + 2;
-    }
   }
   //Volume --
   if (inZ < (ZLastState - 5)) {
     ZLastState = inZ;
     Serial.write('P');
-
-    //Controle do led
-    //Acende todos os leds, depois desliga apenas os necessários
-    for (int i = 0; i < indexAudioLed; i++) {
-      strip.setPixelColor(i, 100, 0, 100);
-    }
-    strip.setPixelColor(indexAudioLed, 0, 0, 0);
-    strip.setPixelColor(indexAudioLed + 1, 0, 0, 0);
-    if (indexAudioLed > 2 ) {
-      indexAudioLed = indexAudioLed - 2;
-    }
   }
 
   //Muta o audio, estrutura feita para que o audio seja mutado apenas uma vez enquanto inZ for 0
@@ -167,16 +170,8 @@ void loop() {
     muteAux = 1;
     Serial.write('Q');
 
-    //Controle do led
-    indexAudioLed = 0;
-    strip.setPixelColor(0, 0, 0, 0);
-    strip.setPixelColor(1, 0, 0, 0);
   } else if (inZ != 0) {
     muteAux = 0;
   }
-
-  strip.show();
-
-
 
 }
